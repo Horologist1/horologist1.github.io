@@ -59,33 +59,98 @@
 
   .section-label {
     font-size: 14px; letter-spacing: 3px;
-    color: var(--red-dim);
+    color: var(--red);
     margin-bottom: 36px;
   }
-  .section-label::before { content: '> '; color: #1a0800; }
+  .section-label::before { content: '> '; color: var(--red-dim); }
 
   /* ── HERO ── */
   .hero {
     text-align: center;
     padding: 88px 0 64px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Scanline overlay on hero */
+  .hero::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.18) 3px,
+      rgba(0,0,0,0.18) 4px
+    );
+    pointer-events: none;
+    animation: scanflicker 6s infinite;
+  }
+
+  @keyframes scanflicker {
+    0%,95%,100% { opacity: 1; }
+    96% { opacity: 0.6; }
+    97% { opacity: 1; }
+    98% { opacity: 0.4; }
+    99% { opacity: 1; }
   }
 
   .hero-title {
     font-size: clamp(32px, 6vw, 58px);
     letter-spacing: clamp(10px, 2.5vw, 20px);
     color: var(--red);
-    text-shadow: 0 0 28px rgba(204,34,0,0.45);
+    text-shadow: 0 0 28px rgba(204,34,0,0.5);
+    white-space: nowrap;
     display: inline-block;
-    animation: glitch 9s infinite;
+    position: relative;
+    animation: glitch-title 8s infinite;
   }
 
-  @keyframes glitch {
-    0%,91%,100% { transform: none; text-shadow: 0 0 28px rgba(204,34,0,0.45); }
-    92%  { transform: skewX(-4deg) translateX(3px);  text-shadow: -2px 0 #ff0000, 2px 0 rgba(0,180,255,0.4); }
-    93%  { transform: skewX(2deg)  translateX(-2px); text-shadow:  2px 0 #ff0000; }
-    94%  { transform: none; }
-    95%  { transform: translateX(1px); text-shadow: -1px 0 #ff0000; }
-    96%  { transform: none; text-shadow: 0 0 28px rgba(204,34,0,0.45); }
+  /* Glitch pseudo-layers on title */
+  .hero-title::before,
+  .hero-title::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    overflow: hidden;
+    opacity: 0;
+  }
+  .hero-title::before {
+    color: #ff2200;
+    animation: glitch-before 8s infinite;
+    clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
+  }
+  .hero-title::after {
+    color: #660000;
+    animation: glitch-after 8s infinite;
+    clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+  }
+
+  @keyframes glitch-title {
+    0%,89%,100% { transform: none; text-shadow: 0 0 28px rgba(204,34,0,0.5); }
+    90% { transform: skewX(-5deg) translateX(4px);  text-shadow: -3px 0 #ff1100, 3px 0 rgba(0,150,255,0.3); }
+    91% { transform: skewX(3deg)  translateX(-3px); text-shadow:  3px 0 #ff0000; }
+    92% { transform: none; }
+    93% { transform: translateX(2px) skewX(-1deg); text-shadow: -2px 0 #ee1100; }
+    94% { transform: none; text-shadow: 0 0 28px rgba(204,34,0,0.5); }
+  }
+
+  @keyframes glitch-before {
+    0%,89%,100% { opacity: 0; transform: none; }
+    90% { opacity: 0.8; transform: translateX(-4px); }
+    91% { opacity: 0; }
+    93% { opacity: 0.6; transform: translateX(3px); }
+    94% { opacity: 0; }
+  }
+
+  @keyframes glitch-after {
+    0%,89%,100% { opacity: 0; transform: none; }
+    90% { opacity: 0.7; transform: translateX(4px); }
+    91% { opacity: 0.3; transform: translateX(-2px); }
+    92% { opacity: 0; }
+    93% { opacity: 0.5; transform: translateX(2px); }
+    94% { opacity: 0; }
   }
 
   .hero-sub {
@@ -103,7 +168,7 @@
   /* ── ABOUT ── */
   .about-text {
     font-size: 18px; line-height: 2.1;
-    color: #553322; max-width: 680px;
+    color: #996644; max-width: 680px;
   }
   .about-text strong { color: var(--red); font-style: normal; }
 
@@ -155,20 +220,20 @@
   /* ── APP DESCRIPTION ── */
   .app-desc {
     font-size: 18px; line-height: 2.1;
-    color: #553322; max-width: 680px; margin-bottom: 28px;
+    color: #996644; max-width: 680px; margin-bottom: 28px;
   }
 
   .app-badge {
     display: inline-block;
-    border: 1px solid var(--red-dim);
+    border: 1px solid var(--red);
     padding: 12px 28px;
     font-size: 15px; letter-spacing: 2px;
-    color: var(--red-dim);
+    color: var(--red);
   }
 
   /* ── PLAYLISTS ── */
   .pl-intro {
-    font-size: 16px; color: #3a1800;
+    font-size: 16px; color: #996644;
     line-height: 1.9; margin-bottom: 36px;
   }
 
@@ -180,14 +245,14 @@
 
   .pl-card {
     background: #020000;
-    border: 1px solid #110200;
-    border-left: 2px solid var(--red-dim);
+    border: 1px solid #1a0400;
+    border-left: 2px solid var(--red-mid);
     padding: 16px;
   }
 
-  .pl-num  { font-size: 12px; color: var(--red-dim); letter-spacing: 2px; margin-bottom: 4px; }
+  .pl-num  { font-size: 12px; color: var(--red-mid); letter-spacing: 2px; margin-bottom: 4px; }
   .pl-name { font-size: 15px; color: var(--red); letter-spacing: 2px; margin-bottom: 6px; }
-  .pl-mood { font-size: 13px; color: #442211; font-style: italic; line-height: 1.65; margin-bottom: 12px; }
+  .pl-mood { font-size: 13px; color: #886644; font-style: italic; line-height: 1.65; margin-bottom: 12px; }
 
   .pl-card iframe { width: 100%; border-radius: 5px; display: block; }
 
@@ -196,7 +261,7 @@
     border-top: 1px solid var(--red-faint);
     padding: 36px 24px;
     text-align: center;
-    font-size: 14px; color: var(--red-dim);
+    font-size: 14px; color: var(--red-mid);
     letter-spacing: 2px;
   }
 
@@ -223,7 +288,7 @@
 
     <!-- ──────────── HERO ──────────── -->
     <div class="hero">
-      <div class="hero-title">H O R O L O G I S T</div>
+      <div class="hero-title" data-text="H O R O L O G I S T">H O R O L O G I S T</div>
       <div class="hero-sub">novel developer &nbsp;·&nbsp; strange tools for stranger minds</div>
       <div class="hero-rule"></div>
     </div>
@@ -232,11 +297,9 @@
     <div class="section">
       <div class="section-label">ABOUT</div>
       <p class="about-text">
-        I build things that probably shouldn't exist.<br><br>
-        <strong>Horologist</strong> is a solo developer making apps that sit at the edge
-        of technology and ritual — tools designed not for efficiency, but for
-        <strong>experience</strong>.<br><br>
-        There is a kind of software that asks nothing of you except that you
+        I'm a solo developer making apps that sit at the edge of technology and ritual —
+        tools designed not for efficiency, but for <strong>experience</strong>.<br><br>
+        I make a kind of software that asks nothing of you except that you
         pay attention. That is the only kind worth making.<br><br>
         Currently shipping: <strong>Faust Wish</strong> for Android.
       </p>
