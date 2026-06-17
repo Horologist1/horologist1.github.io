@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOROLOGIST · developer</title>
+<style>
+  :root {
+    --red:      #CC2200;
+    --red-mid:  #882200;
+    --red-dim:  #441100;
+    --red-dark: #220800;
+    --red-faint:#1a0500;
+    --text:     #664422;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #000;
+    color: var(--text);
+    font-family: 'Courier New', 'Lucida Console', monospace;
+    overflow-x: hidden;
+  }
+
+  /* Matrix canvas */
+  #matrix {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0.10; z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Content layer */
+  .page { position: relative; z-index: 1; }
+
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Terminal bar */
+  .term-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(0,0,0,0.93);
+    border-bottom: 1px solid var(--red-faint);
+    padding: 9px 24px;
+    font-size: 9px; letter-spacing: 2px;
+    color: #3a1000;
+    backdrop-filter: blur(6px);
+  }
+
+  /* Sections */
+  .section {
+    border-top: 1px solid var(--red-faint);
+    padding: 60px 0;
+  }
+
+  .section-label {
+    font-size: 9px; letter-spacing: 3px;
+    color: var(--red-dim);
+    margin-bottom: 36px;
+  }
+  .section-label::before { content: '> '; color: #1a0800; }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    padding: 88px 0 64px;
+  }
+
+  .hero-title {
+    font-size: clamp(20px, 4.5vw, 36px);
+    letter-spacing: clamp(8px, 2vw, 16px);
+    color: var(--red);
+    text-shadow: 0 0 28px rgba(204,34,0,0.45);
+    display: inline-block;
+    animation: glitch 9s infinite;
+  }
+
+  @keyframes glitch {
+    0%,91%,100% { transform: none; text-shadow: 0 0 28px rgba(204,34,0,0.45); }
+    92%  { transform: skewX(-4deg) translateX(3px);  text-shadow: -2px 0 #ff0000, 2px 0 rgba(0,180,255,0.4); }
+    93%  { transform: skewX(2deg)  translateX(-2px); text-shadow:  2px 0 #ff0000; }
+    94%  { transform: none; }
+    95%  { transform: translateX(1px); text-shadow: -1px 0 #ff0000; }
+    96%  { transform: none; text-shadow: 0 0 28px rgba(204,34,0,0.45); }
+  }
+
+  .hero-sub {
+    margin-top: 14px;
+    font-size: 10px; letter-spacing: 4px;
+    color: var(--red-mid);
+    font-style: italic;
+  }
+
+  .hero-rule {
+    margin: 36px auto; width: 100px; height: 1px;
+    background: var(--red-dark);
+  }
+
+  /* ── ABOUT ── */
+  .about-text {
+    font-size: 13px; line-height: 2.1;
+    color: #553322; max-width: 580px;
+  }
+  .about-text strong { color: var(--red); font-style: normal; }
+
+  /* ── PHONE MOCKUPS ── */
+  .mockups {
+    display: flex; gap: 28px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 40px 0 36px;
+  }
+
+  .phone {
+    width: 158px; height: 306px;
+    border: 1.5px solid var(--red-dim);
+    border-radius: 22px;
+    background: #000;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 0 24px rgba(68,17,0,0.35), inset 0 0 0 1px #080000;
+  }
+
+  .phone-notch {
+    width: 38px; height: 5px;
+    background: var(--red-dark);
+    border-radius: 3px;
+    margin: 8px auto 4px;
+  }
+
+  .phone-screen {
+    padding: 3px 8px 8px;
+    height: calc(100% - 20px);
+    display: flex; flex-direction: column;
+    font-size: 5.5px; letter-spacing: 0.4px;
+    line-height: 1.45; overflow: hidden;
+  }
+
+  .ps-bar   { color:#2a0e00; border-bottom:1px solid #080100; padding-bottom:2px; margin-bottom:5px; font-size:4.8px; }
+  .ps-red   { color: var(--red); }
+  .ps-mid   { color: var(--red-mid); }
+  .ps-dim   { color: var(--red-dim); }
+  .ps-brown { color: #664422; }
+  .ps-ctr   { text-align: center; }
+  .ps-gap   { flex: 1; }
+  .ps-btn   { border:1px solid var(--red); padding:3px 4px; text-align:center; color:var(--red); margin:3px 0; }
+  .ps-btn2  { border:1px solid #2a0e00; padding:2px 4px; text-align:center; color:#441100; margin:2px 0; }
+  .ps-prog  { height:2px; background:#0a0200; border:1px solid #280600; margin:4px 0; overflow:hidden; }
+  .ps-fill  { height:100%; background:#772211; width:38%; }
+
+  /* ── APP DESCRIPTION ── */
+  .app-desc {
+    font-size: 13px; line-height: 2.1;
+    color: #553322; max-width: 580px; margin-bottom: 28px;
+  }
+
+  .app-badge {
+    display: inline-block;
+    border: 1px solid var(--red-dim);
+    padding: 9px 22px;
+    font-size: 11px; letter-spacing: 2px;
+    color: var(--red-dim);
+  }
+
+  /* ── PLAYLISTS ── */
+  .pl-intro {
+    font-size: 11px; color: #3a1800;
+    line-height: 1.9; margin-bottom: 36px;
+  }
+
+  .pl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+  }
+
+  .pl-card {
+    background: #020000;
+    border: 1px solid #110200;
+    border-left: 2px solid var(--red-dim);
+    padding: 14px;
+  }
+
+  .pl-num  { font-size: 8px; color: var(--red-dim); letter-spacing: 2px; margin-bottom: 3px; }
+  .pl-name { font-size: 11px; color: var(--red); letter-spacing: 2px; margin-bottom: 5px; }
+  .pl-mood { font-size: 10px; color: #442211; font-style: italic; line-height: 1.65; margin-bottom: 11px; }
+
+  .pl-card iframe { width: 100%; border-radius: 5px; display: block; }
+
+  /* ── FOOTER ── */
+  .footer {
+    border-top: 1px solid var(--red-faint);
+    padding: 36px 24px;
+    text-align: center;
+    font-size: 9px; color: var(--red-dim);
+    letter-spacing: 2px;
+  }
+
+  .footer a { color: var(--red); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: #000; }
+  ::-webkit-scrollbar-thumb { background: var(--red-dark); }
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+
+<div class="page">
+
+  <!-- Terminal bar -->
+  <div class="term-bar">
+    HOROLOGIST ──────────────────────────────────────────────── [■■■]
+  </div>
+
+  <div class="wrap">
+
+    <!-- ──────────── HERO ──────────── -->
+    <div class="hero">
+      <div class="hero-title">H O R O L O G I S T</div>
+      <div class="hero-sub">novel developer &nbsp;·&nbsp; strange tools for stranger minds</div>
+      <div class="hero-rule"></div>
+    </div>
+
+    <!-- ──────────── ABOUT ──────────── -->
+    <div class="section">
+      <div class="section-label">ABOUT</div>
+      <p class="about-text">
+        I build things that probably shouldn't exist.<br><br>
+        <strong>Horologist</strong> is a solo developer making apps that sit at the edge
+        of technology and ritual — tools designed not for efficiency, but for
+        <strong>experience</strong>.<br><br>
+        There is a kind of software that asks nothing of you except that you
+        pay attention. That is the only kind worth making.<br><br>
+        Currently shipping: <strong>Faust Wish</strong> for Android.
+      </p>
+    </div>
+
+    <!-- ──────────── FAUST WISH ──────────── -->
+    <div class="section">
+      <div class="section-label">FAUST WISH &nbsp;·&nbsp; android oracle</div>
+
+      <div class="mockups">
+
+        <!-- HOME SCREEN -->
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="ps-bar">FAUST·WISH·v1.0 ──── [■■■]</div>
+            <div style="font-size:3px;color:#1a0600;text-align:center;letter-spacing:0;line-height:1">
+              ▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░▒▓▒░
+            </div>
+            <div class="ps-gap"></div>
+            <div class="ps-ctr ps-red" style="font-size:13px;letter-spacing:6px;text-shadow:0 0 8px #661100;margin-bottom:2px">FAUST</div>
+            <div class="ps-ctr ps-dim" style="font-size:5px;letter-spacing:2px;margin-bottom:16px">speak your wishes</div>
+            <div class="ps-btn" style="font-size:5.5px;letter-spacing:1px">[ SPEAK YOUR WISH ]</div>
+            <div class="ps-btn2" style="font-size:5px">[ WRITE A SCROLL ]</div>
+            <div class="ps-gap"></div>
+            <div class="ps-ctr ps-dim" style="font-size:4.8px">3 wish(es) remaining today</div>
+          </div>
+        </div>
+
+        <!-- PROCESSING SCREEN -->
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="ps-bar">FAUST·WISH·v1.0 ──── [■■■]</div>
+            <div class="ps-gap"></div>
+            <div style="text-align:center;color:#661100;font-size:4.5px;line-height:1.25;letter-spacing:0">
+              ░░▒▒▓▓██▓▒░░░<br>
+              ░▒▒▓▓████▓▒░░<br>
+              ░▒▓▓██████▓▒░<br>
+              ▒▒▓▓████████▒<br>
+              ▒▓▓██████████
+            </div>
+            <div style="height:10px"></div>
+            <div class="ps-ctr ps-dim" style="font-size:5.5px;letter-spacing:1px">consulting the abyss...</div>
+            <div style="height:9px"></div>
+            <div class="ps-prog"><div class="ps-fill"></div></div>
+            <div class="ps-gap"></div>
+          </div>
+        </div>
+
+        <!-- RESPONSE SCREEN -->
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="ps-bar">FAUST·WISH·v1.0 ──── [■■■]</div>
+            <div class="ps-red" style="font-size:5px;line-height:1.75;margin-bottom:5px">
+              What you seek already knows<br>
+              your name. Stop pretending<br>
+              otherwise.
+            </div>
+            <div style="border-top:1px solid #180400;border-bottom:1px solid #180400;padding:5px 0 4px;margin:2px 0">
+              <div class="ps-ctr ps-red" style="font-size:7px;letter-spacing:3px">A R C A N U M</div>
+              <div class="ps-ctr ps-mid" style="font-size:5px;letter-spacing:2px;margin-bottom:3px">A S S I G N E D</div>
+              <div class="ps-ctr ps-red" style="font-size:7px;letter-spacing:2px">0 · THE FOOL</div>
+              <div style="height:3px"></div>
+              <div class="ps-ctr ps-brown" style="font-size:4px;line-height:1.25;letter-spacing:0">
+                ⣷⣿⣿⣷⣷⣾⣿⣿<br>⣿⣿⣿⣿⣿⣿⣷⣿<br>⣾⣷⣿⣿⣿⣿⣿⣷
+              </div>
+              <div style="height:2px"></div>
+              <div class="ps-ctr" style="font-size:4.5px;color:#662211;letter-spacing:1px">BEGINNINGS</div>
+            </div>
+            <div class="ps-brown" style="font-size:4.5px;font-style:italic;line-height:1.65;margin-top:4px">
+              ♫ The Fool Playlist in Spotify →<br>
+              <span style="font-size:4px;color:#331100">"where the map ends and<br>the leap begins"</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /mockups -->
+
+      <p class="app-desc">
+        Type or speak your wish — the abyss answers.<br><br>
+        Each response comes with a Major Arcana card, a personalized description
+        generated by AI, and a curated Spotify playlist tuned to the energy
+        of your fate. Three free wishes per day. Watch the abyss for more.
+      </p>
+
+      <div class="app-badge">[ COMING TO GOOGLE PLAY ]</div>
+
+    </div><!-- /faust wish section -->
+
+    <!-- ──────────── ARCANA PLAYLISTS ──────────── -->
+    <div class="section">
+      <div class="section-label">ARCANA PLAYLISTS &nbsp;·&nbsp; 22 major arcana</div>
+      <p class="pl-intro">
+        Each of the 22 Major Arcana has a dedicated playlist —<br>
+        curated to match its energy, mood, and symbolic weight.<br>
+        Open one. See which finds you.
+      </p>
+      <div class="pl-grid" id="plGrid"></div>
+    </div>
+
+  </div><!-- /wrap -->
+
+  <div class="footer">
+    <a href="https://github.com/Horologist1" target="_blank">github.com/Horologist1</a>
+    &nbsp;·&nbsp; HOROLOGIST &nbsp;·&nbsp; 2026
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ── Matrix rain ──────────────────────────────────────────────────
+const canvas = document.getElementById('matrix');
+const ctx    = canvas.getContext('2d');
+const CHARS  = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモ0123456789▓▒░█';
+const FS     = 13;
+let cols, drops;
+
+function resize() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  cols  = Math.floor(canvas.width / FS);
+  drops = Array(cols).fill(1);
+}
+resize();
+window.addEventListener('resize', resize);
+
+setInterval(() => {
+  ctx.fillStyle = 'rgba(0,0,0,0.055)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.font      = FS + 'px monospace';
+  for (let i = 0; i < cols; i++) {
+    const bright = Math.random() > 0.97;
+    ctx.fillStyle = bright ? '#FF3300' : '#661100';
+    ctx.fillText(CHARS[Math.floor(Math.random() * CHARS.length)], i * FS, drops[i] * FS);
+    if (drops[i] * FS > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  }
+}, 50);
+
+// ── Playlist data ─────────────────────────────────────────────────
+const ARCANA = [
+  { num:'0',     name:'THE FOOL',          id:'7u4e5W5MlVJnonvljSyh9V', mood:'where the map ends and the leap begins' },
+  { num:'I',     name:'THE MAGICIAN',      id:'6vnxm6QUfn9bS7xzHmwATq', mood:'all elements at hand · will made visible' },
+  { num:'II',    name:'THE HIGH PRIESTESS',id:'1aV4Vh63h1RDPCy8YHHyxg', mood:'what lives beyond the veil the mind cannot cross' },
+  { num:'III',   name:'THE EMPRESS',       id:'3h8dbWhIrg3LifeEi6XFsX', mood:'the earth in her fullness · beauty that needs no permission' },
+  { num:'IV',    name:'THE EMPEROR',       id:'6b28GrD4lqVivuiaJwAH8d', mood:'the architecture of order · stone upon stone upon stone' },
+  { num:'V',     name:'THE HIEROPHANT',    id:'3mwa9NjEibWzFoYShh4cFZ', mood:'the ancient transmission · what cannot be learned, only received' },
+  { num:'VI',    name:'THE LOVERS',        id:'05gFDU5ocHXdl18ySMQwp3', mood:'the crossroads of the heart · two paths that cannot both be walked' },
+  { num:'VII',   name:'THE CHARIOT',       id:'6voVIYautfMLiNpOpTPq2B', mood:'opposing forces brought to one point · victory through direction' },
+  { num:'VIII',  name:'STRENGTH',          id:'5HlwABxzkOGWnfxoexQj3X', mood:'the jaw opened by tenderness · dominion that requires no force' },
+  { num:'IX',    name:'THE HERMIT',        id:'7a9sHiYK3iKJQMKdMFB7ob', mood:'withdrawn from the world to illuminate it from within' },
+  { num:'X',     name:'WHEEL OF FORTUNE',  id:'22bthB3t1ucRGC9xukIQuV', mood:'the great turning · fate wearing the face of chance' },
+  { num:'XI',    name:'JUSTICE',           id:'4GCuJk084XXTmDG9O5uA2V', mood:'the blade that does not waver · what is owed will be returned' },
+  { num:'XII',   name:'THE HANGED MAN',    id:'2DBNTu4wEHhASR1IrrTlRZ', mood:'the gift that only comes to those who choose to be still' },
+  { num:'XIII',  name:'DEATH',             id:'19bFh58D7xrevvdRbDhqRC', mood:'what must be shed so the unnamed may finally arrive' },
+  { num:'XIV',   name:'TEMPERANCE',        id:'2ryYhtQ8b1qtDda94NKpB8', mood:'the great work of alchemy · two streams made into one' },
+  { num:'XV',    name:'THE DEVIL',         id:'0TYi8tVEskIGMouvN2bMgX', mood:'the chains that were chosen · the shadow that knows your name' },
+  { num:'XVI',   name:'THE TOWER',         id:'1Lglq8TpW1pBYntjCfTwYF', mood:'the grace concealed inside the fall of what could not stand' },
+  { num:'XVII',  name:'THE STAR',          id:'3zXib6Urzto7k2Ubbk4Chs', mood:'after the ruin, the stars remain and the water still flows' },
+  { num:'XVIII', name:'THE MOON',          id:'46sTh9VQ2bvYXEI3tE8MTh', mood:'the hour the mind mistakes its own echo for the voice of the world' },
+  { num:'XIX',   name:'THE SUN',           id:'5ToFFKZ13q8rmazXL0MevD', mood:'the soul before it learned to doubt itself · unbroken and radiant' },
+  { num:'XX',    name:'JUDGEMENT',         id:'1796gcT7tJxLKEoHmcujVA', mood:'the call that cannot be unheard · the old life no longer fits' },
+  { num:'XXI',   name:'THE WORLD',         id:'69LgIuJhXs6egLEVKV4y4Z', mood:'not an ending · the completion of one full turn of the great wheel' },
+];
+
+const grid = document.getElementById('plGrid');
+ARCANA.forEach(a => {
+  const card = document.createElement('div');
+  card.className = 'pl-card';
+  card.innerHTML =
+    `<div class="pl-num">${a.num}</div>` +
+    `<div class="pl-name">${a.name}</div>` +
+    `<div class="pl-mood">"${a.mood}"</div>` +
+    `<iframe src="https://open.spotify.com/embed/playlist/${a.id}?utm_source=generator&theme=0" ` +
+    `height="80" frameborder="0" ` +
+    `allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" ` +
+    `loading="lazy"></iframe>`;
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>
